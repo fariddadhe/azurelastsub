@@ -98,34 +98,9 @@
                 $error_message = $e->getMessage();
                 echo $code.": ".$error_message."<br />";
             }
-            catch(InvalidArgumentTypeException $e){
-                // Handle exception based on error codes and messages.
-                // Error codes and messages are here:
-                // http://msdn.microsoft.com/library/azure/dd179439.aspx
-                $code = $e->getCode();
-                $error_message = $e->getMessage();
-                echo $code.": ".$error_message."<br />";
-            }
+            
         } 
-        else 
-        {
-
-            try{
-                // Delete container.
-                echo "Deleting Container".PHP_EOL;
-                echo $_GET["containerName"].PHP_EOL;
-                echo "<br />";
-                $blobClient->deleteContainer($_GET["containerName"]);
-            }
-            catch(ServiceException $e){
-                // Handle exception based on error codes and messages.
-                // Error codes and messages are here:
-                // http://msdn.microsoft.com/library/azure/dd179439.aspx
-                $code = $e->getCode();
-                $error_message = $e->getMessage();
-                echo $code.": ".$error_message."<br />";
-            }
-        }
+        
         return $url;
     }
 
