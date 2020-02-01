@@ -104,7 +104,7 @@
         return $url;
     }
 
-    if(isset($_POST['file'])){
+    if(!isset($_POST['file'])){
         // $file = $_FILES['file']['tmp_name'];
 							
 		// $path_parts = pathinfo(($_FILES['file']['name']));
