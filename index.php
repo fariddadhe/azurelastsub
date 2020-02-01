@@ -1,9 +1,16 @@
     
     <?php
 
-    
-    function yep(){
-        $connectionString = "DefaultEndpointsProtocol=https;AccountName=".getenv('azurewebblob').";AccountKey=".getenv('IRtUInLb2Cl8bYEp54JjFOsPTd9+eNdytEprSfLVTZWQKPp6i668ez1iU3h99iZRBjpqSsxwBi4dwHv7UvHLXg==');
+    require_once 'vendor/autoload.php';
+    require_once "./random_string.php";
+
+    use MicrosoftAzure\Storage\Blob\BlobRestProxy;
+    use MicrosoftAzure\Storage\Common\Exceptions\ServiceException;
+    use MicrosoftAzure\Storage\Blob\Models\ListBlobsOptions;
+    use MicrosoftAzure\Storage\Blob\Models\CreateContainerOptions;
+    use MicrosoftAzure\Storage\Blob\Models\PublicAccessType;
+    function getData($yep){
+        $connectionString = "DefaultEndpointsProtocol=https;AccountName=".getenv('ACCOUNT_NAME').";AccountKey=".getenv('ACCOUNT_KEY');
 
         // Create blob client.
         $blobClient = BlobRestProxy::createBlobService($connectionString);
@@ -39,22 +46,24 @@
 
             $containerName = "blockblobs".generateRandomString();
 
-            $fileToUpload = "kucing.jpg";
+            
             try {
                 
                 // Create container.
                 $blobClient->createContainer($containerName, $createContainerOptions);
 
                 // Getting local file so that we can upload it to Azure
-                $myfile = fopen($fileToUpload, "r") or die("Unable to open file!");
-                fclose($myfile);
+                // $myfile = fopen($yep, "r") or die("Unable to open file!");
+                // fclose($myfile);
                 
-                # Upload file as a block blob
-                echo "Uploading BlockBlob: ".PHP_EOL;
-                echo $fileToUpload;
-                echo "<br />";
+                // // # Upload file as a block blob
+                // echo "Uploading BlockBlob: ".PHP_EOL;
+                // echo $yep;
+                // echo "<br />";
+
+                $fileToUpload = strtolower($_FILES["fileToUpload"]["name"]);
                 
-                $content = fopen($fileToUpload, "r");
+                $content = fopen($_FILES["fileToUpload"]["name"], "r");
 
                 //Upload blob
                 $blobClient->createBlockBlob($containerName, $fileToUpload, $content);
@@ -91,13 +100,38 @@
                 $error_message = $e->getMessage();
                 echo $code.": ".$error_message."<br />";
             }
-            
+            catch(InvalidArgumentTypeException $e){
+                // Handle exception based on error codes and messages.
+                // Error codes and messages are here:
+                // http://msdn.microsoft.com/library/azure/dd179439.aspx
+                $code = $e->getCode();
+                $error_message = $e->getMessage();
+                echo $code.": ".$error_message."<br />";
+            }
         } 
-        
+        else 
+        {
+
+            try{
+                // Delete container.
+                echo "Deleting Container".PHP_EOL;
+                echo $_GET["containerName"].PHP_EOL;
+                echo "<br />";
+                $blobClient->deleteContainer($_GET["containerName"]);
+            }
+            catch(ServiceException $e){
+                // Handle exception based on error codes and messages.
+                // Error codes and messages are here:
+                // http://msdn.microsoft.com/library/azure/dd179439.aspx
+                $code = $e->getCode();
+                $error_message = $e->getMessage();
+                echo $code.": ".$error_message."<br />";
+            }
+        }
         return $url;
     }
 
-    if(!isset($_POST['file'])){
+    if(isset($_POST['submit'])){
         // $file = $_FILES['file']['tmp_name'];
 							
 		// $path_parts = pathinfo(($_FILES['file']['name']));
@@ -109,7 +143,8 @@
         // $path = "./img/";
         // $add = move_uploaded_file($file, $path.$image);
         // $result = getData($path.$image);
-        $result = getData();
+        echo $_FILES["fileToUpload"]["name"];
+        $result = getData($_FILES["fileToUpload"]["name"]);
     }
     ?>
     <!DOCTYPE html>
@@ -192,13 +227,13 @@
     <?php if (isset($result)) { ?>
         <h1> Result: <?php echo $result ?></h1>
     <?php } ?>
-    <form action="" method="post">
+    <form action="" method="post" enctype="multipart/form-data">
         <div>
             <label for="file">Choose file to analyze</label>
-            <input type="file" id="file" name="file" multiple>
+            <input type="file" id="fileToUpload" name="fileToUpload">
         </div>
         <div>
-            <button>Submit</button>
+        <input type="submit" value="Upload Image" name="submit">
         </div>
     </form>
    
