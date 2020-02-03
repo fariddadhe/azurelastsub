@@ -13,51 +13,28 @@
     function getData($oit){
       
 
-        
-
-            
-            try {
-                
-                // Create container.
-                $blobClient->createContainer($containerName, $createContainerOptions);
-
-                $myfile = fopen($_FILES["fileToUpload"]["tmp_name"], "r") or die("Unable to open file!");
-                fclose($myfile);
-
-                $fileToUpload = strtolower($_FILES["fileToUpload"]["name"]);
-                
-                // $content = fopen($_FILES["fileToUpload"]["name"], "r");
-
-                $check = fopen($_FILES["fileToUpload"]["tmp_name"], "r");
-                
-
-                //Upload blob
-                $blobClient->createBlockBlob($containerName, $fileToUpload, $check);
-
-                // List blobs.
-                $listBlobsOptions = new ListBlobsOptions();
-                $listBlobsOptions->setPrefix($fileToUpload);
-
-                // echo "These are the blobs present in the container: ";
-
-            }
-            catch(ServiceException $e){
-                $code = $e->getCode();
-                $error_message = $e->getMessage();
-                echo $code.": ".$error_message."<br />";
-            }
-            catch(InvalidArgumentTypeException $e){
-                $code = $e->getCode();
-                $error_message = $e->getMessage();
-                echo $code.": ".$error_message."<br />";
-            }
-      
         return "sdsdf";
     }
 
     if(isset($_POST['submit'])){
         $result = getData("Bangke");
     }
+
+        $connectionString = "DefaultEndpointsProtocol=https;AccountName=".getenv('azurewebblob').";AccountKey=".getenv('IRtUInLb2Cl8bYEp54JjFOsPTd9+eNdytEprSfLVTZWQKPp6i668ez1iU3h99iZRBjpqSsxwBi4dwHv7UvHLXg==');
+
+        // Create blob client.
+        $blobClient = BlobRestProxy::createBlobService($connectionString);
+
+        do{
+                    $result = $blobClient->listBlobs($containerName, $listBlobsOptions);
+                    foreach ($result->getBlobs() as $blob)
+                    {
+                        // echo $blob->getName().": ".$blob->getUrl()."<br />";
+                        $url = $blob->getUrl();
+                    }
+                
+                    $listBlobsOptions->setContinuationToken($result->getContinuationToken());
+         } while($result->getContinuationToken());
     ?>
 
     <!DOCTYPE html>
