@@ -1,14 +1,7 @@
     
     <?php
 
-    require_once 'vendor/autoload.php';
-    require_once "./random_string.php";
-
-    use MicrosoftAzure\Storage\Blob\BlobRestProxy;
-    use MicrosoftAzure\Storage\Common\Exceptions\ServiceException;
-    use MicrosoftAzure\Storage\Blob\Models\ListBlobsOptions;
-    use MicrosoftAzure\Storage\Blob\Models\CreateContainerOptions;
-    use MicrosoftAzure\Storage\Blob\Models\PublicAccessType;
+ 
     function getData($yep){
         $connectionString = "DefaultEndpointsProtocol=https;AccountName=".getenv('azurewebblob').";AccountKey=".getenv('IRtUInLb2Cl8bYEp54JjFOsPTd9+eNdytEprSfLVTZWQKPp6i668ez1iU3h99iZRBjpqSsxwBi4dwHv7UvHLXg==');
 
