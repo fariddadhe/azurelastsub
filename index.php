@@ -1,8 +1,14 @@
     
     <?php
 
- 
-   
+    function getData(){
+      return "bangke"
+    }
+
+    if(isset($_POST['submit'])){
+        $result = getData();
+    }
+    ?>
     <!DOCTYPE html>
     <html>
     <head>
