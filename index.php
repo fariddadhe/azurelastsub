@@ -10,8 +10,13 @@
     use MicrosoftAzure\Storage\Blob\Models\CreateContainerOptions;
     use MicrosoftAzure\Storage\Blob\Models\PublicAccessType;
 
+ function getData($oit){
+        
+        return $oit;
+    }
+
     if(isset($_POST['submit'])){
-        $result = "uea";
+        $result = getData("Bangke");
     }
     ?>
 
