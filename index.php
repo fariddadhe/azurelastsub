@@ -1,5 +1,11 @@
     
-    
+     <?php
+
+    if(isset($_POST['submit'])){
+        $result = "uea";
+    }
+    ?>
+
     <!DOCTYPE html>
     <html>
     <head>
