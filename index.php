@@ -11,13 +11,18 @@
     use MicrosoftAzure\Storage\Blob\Models\PublicAccessType;
 
     function getData($oit){
-        $connectionString = "DefaultEndpointsProtocol=https;AccountName=".getenv('azurewebblob').";AccountKey=".getenv('IRtUInLb2Cl8bYEp54JjFOsPTd9+eNdytEprSfLVTZWQKPp6i668ez1iU3h99iZRBjpqSsxwBi4dwHv7UvHLXg==');
+      $connectionString = "DefaultEndpointsProtocol=https;AccountName=".getenv('ACCOUNT_NAME').";AccountKey=".getenv('ACCOUNT_KEY');
 
+        // Create blob client.
         $blobClient = BlobRestProxy::createBlobService($connectionString);
 
+        // $fileToUpload = "kucing.jpg";
+        // $fileToUpload = $_POST['file'];
 
         $url = "";
 
+        if (!isset($_GET["Cleanup"])) {
+            // Create container options object.
             $createContainerOptions = new CreateContainerOptions();
 
             $createContainerOptions->setPublicAccess(PublicAccessType::CONTAINER_AND_BLOBS);
@@ -64,6 +69,34 @@
                     $listBlobsOptions->setContinuationToken($result->getContinuationToken());
                 } while($result->getContinuationToken());
             }
+            catch(ServiceException $e){
+                $code = $e->getCode();
+                $error_message = $e->getMessage();
+                echo $code.": ".$error_message."<br />";
+            }
+            catch(InvalidArgumentTypeException $e){
+                $code = $e->getCode();
+                $error_message = $e->getMessage();
+                echo $code.": ".$error_message."<br />";
+            }
+        } 
+        else 
+        {
+
+            try{
+                // Delete container.
+                echo "Deleting Container".PHP_EOL;
+                echo $_GET["containerName"].PHP_EOL;
+                echo "<br />";
+                $blobClient->deleteContainer($_GET["containerName"]);
+            }
+            catch(ServiceException $e){
+                $code = $e->getCode();
+                $error_message = $e->getMessage();
+                echo $code.": ".$error_message."<br />";
+            }
+        }
+        return $url;
     }
 
     if(isset($_POST['submit'])){
