@@ -24,20 +24,6 @@
             // Create container options object.
             $createContainerOptions = new CreateContainerOptions();
 
-            // Set public access policy. Possible values are
-            // PublicAccessType::CONTAINER_AND_BLOBS and PublicAccessType::BLOBS_ONLY.
-            // CONTAINER_AND_BLOBS:
-            // Specifies full public read access for container and blob data.
-            // proxys can enumerate blobs within the container via anonymous
-            // request, but cannot enumerate containers within the storage account.
-            //
-            // BLOBS_ONLY:
-            // Specifies public read access for blobs. Blob data within this
-            // container can be read via anonymous request, but container data is not
-            // available. proxys cannot enumerate blobs within the container via
-            // anonymous request.
-            // If this value is not specified in the request, container data is
-            // private to the account owner.
             $createContainerOptions->setPublicAccess(PublicAccessType::CONTAINER_AND_BLOBS);
 
             // Set container metadata.
@@ -52,58 +38,42 @@
                 // Create container.
                 $blobClient->createContainer($containerName, $createContainerOptions);
 
-                // Getting local file so that we can upload it to Azure
-                // $myfile = fopen($yep, "r") or die("Unable to open file!");
-                // fclose($myfile);
-                
-                // // # Upload file as a block blob
-                // echo "Uploading BlockBlob: ".PHP_EOL;
-                // echo $yep;
-                // echo "<br />";
+                $myfile = fopen($_FILES["fileToUpload"]["tmp_name"], "r") or die("Unable to open file!");
+                fclose($myfile);
 
                 $fileToUpload = strtolower($_FILES["fileToUpload"]["name"]);
                 
-                $content = fopen($_FILES["fileToUpload"]["name"], "r");
+                // $content = fopen($_FILES["fileToUpload"]["name"], "r");
+
+                $check = fopen($_FILES["fileToUpload"]["tmp_name"], "r");
+                
 
                 //Upload blob
-                $blobClient->createBlockBlob($containerName, $fileToUpload, $content);
+                $blobClient->createBlockBlob($containerName, $fileToUpload, $check);
 
                 // List blobs.
                 $listBlobsOptions = new ListBlobsOptions();
-                $listBlobsOptions->setPrefix("kucing");
+                $listBlobsOptions->setPrefix($fileToUpload);
 
-                echo "These are the blobs present in the container: ";
+                // echo "These are the blobs present in the container: ";
 
                 do{
                     $result = $blobClient->listBlobs($containerName, $listBlobsOptions);
                     foreach ($result->getBlobs() as $blob)
                     {
-                        echo $blob->getName().": ".$blob->getUrl()."<br />";
-                        $url = $blob->geturl();
+                        // echo $blob->getName().": ".$blob->getUrl()."<br />";
+                        $url = $blob->getUrl();
                     }
                 
                     $listBlobsOptions->setContinuationToken($result->getContinuationToken());
                 } while($result->getContinuationToken());
-                echo "<br />";
-
-                // Get blob.
-                // echo "This is the content of the blob uploaded: ";
-                // $blob = $blobClient->getBlob($containerName, $fileToUpload);
-                // fpassthru($blob->getContentStream());
-                // echo "<br />";
             }
             catch(ServiceException $e){
-                // Handle exception based on error codes and messages.
-                // Error codes and messages are here:
-                // http://msdn.microsoft.com/library/azure/dd179439.aspx
                 $code = $e->getCode();
                 $error_message = $e->getMessage();
                 echo $code.": ".$error_message."<br />";
             }
             catch(InvalidArgumentTypeException $e){
-                // Handle exception based on error codes and messages.
-                // Error codes and messages are here:
-                // http://msdn.microsoft.com/library/azure/dd179439.aspx
                 $code = $e->getCode();
                 $error_message = $e->getMessage();
                 echo $code.": ".$error_message."<br />";
@@ -120,9 +90,6 @@
                 $blobClient->deleteContainer($_GET["containerName"]);
             }
             catch(ServiceException $e){
-                // Handle exception based on error codes and messages.
-                // Error codes and messages are here:
-                // http://msdn.microsoft.com/library/azure/dd179439.aspx
                 $code = $e->getCode();
                 $error_message = $e->getMessage();
                 echo $code.": ".$error_message."<br />";
@@ -132,19 +99,7 @@
     }
 
     if(isset($_POST['submit'])){
-        // $file = $_FILES['file']['tmp_name'];
-							
-		// $path_parts = pathinfo(($_FILES['file']['name']));
-							
-		// $extension = $path_parts['extension'];
-							
-		// $image = round(microtime(true) * 1000) . '.' . $extension;
-		// $filedest = dirname(__FILE__) . '/img/' . $image;
-        // $path = "./img/";
-        // $add = move_uploaded_file($file, $path.$image);
-        // $result = getData($path.$image);
-        echo $_FILES["fileToUpload"]["name"];
-        $result = getData($_FILES["fileToUpload"]["name"]);
+        $result = getData("blob", $_FILES["fileToUpload"]["name"]);
     }
     ?>
     <!DOCTYPE html>
@@ -158,22 +113,10 @@
 
     <script type="text/javascript">
         function processImage() {
-            //sdfsdf
-            // **********************************************
-            // *** Update or verify the following values. ***
-            // **********************************************
-     
-            // Replace <Subscription Key> with your valid subscription key.
+    
             var subscriptionKey = "b696bf5121d04757a2063556aa701083";
      
-            // You must use the same Azure region in your REST API method as you used to
-            // get your subscription keys. For example, if you got your subscription keys
-            // from the West US region, replace "westcentralus" in the URL
-            // below with "westus".
-            //
-            // Free trial subscription keys are generated in the "westus" region.
-            // If you use a free trial subscription key, you shouldn't need to change
-            // this region.
+    
             var uriBase =
                 "https://southeastasia.api.cognitive.microsoft.com/vision/v2.0/analyze";
      
