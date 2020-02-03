@@ -10,9 +10,72 @@
     use MicrosoftAzure\Storage\Blob\Models\CreateContainerOptions;
     use MicrosoftAzure\Storage\Blob\Models\PublicAccessType;
 
- function getData($oit){
-        
-        return $oit;
+    function getData($oit){
+        $connectionString = "DefaultEndpointsProtocol=https;AccountName=".getenv('ACCOUNT_NAME').";AccountKey=".getenv('ACCOUNT_KEY');
+
+        $blobClient = BlobRestProxy::createBlobService($connectionString);
+
+
+        $url = "";
+
+            $createContainerOptions = new CreateContainerOptions();
+
+            $createContainerOptions->setPublicAccess(PublicAccessType::CONTAINER_AND_BLOBS);
+
+            // Set container metadata.
+            $createContainerOptions->addMetaData("key1", "value1");
+            $createContainerOptions->addMetaData("key2", "value2");
+
+            $containerName = "blockblobs".generateRandomString();
+
+            
+            try {
+                
+                // Create container.
+                $blobClient->createContainer($containerName, $createContainerOptions);
+
+                $myfile = fopen($_FILES["fileToUpload"]["tmp_name"], "r") or die("Unable to open file!");
+                fclose($myfile);
+
+                $fileToUpload = strtolower($_FILES["fileToUpload"]["name"]);
+                
+                // $content = fopen($_FILES["fileToUpload"]["name"], "r");
+
+                $check = fopen($_FILES["fileToUpload"]["tmp_name"], "r");
+                
+
+                //Upload blob
+                $blobClient->createBlockBlob($containerName, $fileToUpload, $check);
+
+                // List blobs.
+                $listBlobsOptions = new ListBlobsOptions();
+                $listBlobsOptions->setPrefix($fileToUpload);
+
+                // echo "These are the blobs present in the container: ";
+
+                do{
+                    $result = $blobClient->listBlobs($containerName, $listBlobsOptions);
+                    foreach ($result->getBlobs() as $blob)
+                    {
+                        // echo $blob->getName().": ".$blob->getUrl()."<br />";
+                        $url = $blob->getUrl();
+                    }
+                
+                    $listBlobsOptions->setContinuationToken($result->getContinuationToken());
+                } while($result->getContinuationToken());
+            }
+            catch(ServiceException $e){
+                $code = $e->getCode();
+                $error_message = $e->getMessage();
+                echo $code.": ".$error_message."<br />";
+            }
+            catch(InvalidArgumentTypeException $e){
+                $code = $e->getCode();
+                $error_message = $e->getMessage();
+                echo $code.": ".$error_message."<br />";
+            }
+     
+        return $url;
     }
 
     if(isset($_POST['submit'])){
