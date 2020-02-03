@@ -11,27 +11,9 @@
     use MicrosoftAzure\Storage\Blob\Models\PublicAccessType;
 
     function getData($oit){
-      $connectionString = "DefaultEndpointsProtocol=https;AccountName=".getenv('ACCOUNT_NAME').";AccountKey=".getenv('ACCOUNT_KEY');
+      
 
-        // Create blob client.
-        $blobClient = BlobRestProxy::createBlobService($connectionString);
-
-        // $fileToUpload = "kucing.jpg";
-        // $fileToUpload = $_POST['file'];
-
-        $url = "";
-
-        if (!isset($_GET["Cleanup"])) {
-            // Create container options object.
-            $createContainerOptions = new CreateContainerOptions();
-
-            $createContainerOptions->setPublicAccess(PublicAccessType::CONTAINER_AND_BLOBS);
-
-            // Set container metadata.
-            $createContainerOptions->addMetaData("key1", "value1");
-            $createContainerOptions->addMetaData("key2", "value2");
-
-            $containerName = "blockblobs".generateRandomString();
+        
 
             
             try {
@@ -58,16 +40,6 @@
 
                 // echo "These are the blobs present in the container: ";
 
-                do{
-                    $result = $blobClient->listBlobs($containerName, $listBlobsOptions);
-                    foreach ($result->getBlobs() as $blob)
-                    {
-                        // echo $blob->getName().": ".$blob->getUrl()."<br />";
-                        $url = $blob->getUrl();
-                    }
-                
-                    $listBlobsOptions->setContinuationToken($result->getContinuationToken());
-                } while($result->getContinuationToken());
             }
             catch(ServiceException $e){
                 $code = $e->getCode();
@@ -79,24 +51,8 @@
                 $error_message = $e->getMessage();
                 echo $code.": ".$error_message."<br />";
             }
-        } 
-        else 
-        {
-
-            try{
-                // Delete container.
-                echo "Deleting Container".PHP_EOL;
-                echo $_GET["containerName"].PHP_EOL;
-                echo "<br />";
-                $blobClient->deleteContainer($_GET["containerName"]);
-            }
-            catch(ServiceException $e){
-                $code = $e->getCode();
-                $error_message = $e->getMessage();
-                echo $code.": ".$error_message."<br />";
-            }
-        }
-        return $url;
+      
+        return "sdsdf";
     }
 
     if(isset($_POST['submit'])){
