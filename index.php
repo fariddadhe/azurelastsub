@@ -1,6 +1,15 @@
     
      <?php
 
+    require_once 'vendor/autoload.php';
+    require_once "./random_string.php";
+
+    use MicrosoftAzure\Storage\Blob\BlobRestProxy;
+    use MicrosoftAzure\Storage\Common\Exceptions\ServiceException;
+    use MicrosoftAzure\Storage\Blob\Models\ListBlobsOptions;
+    use MicrosoftAzure\Storage\Blob\Models\CreateContainerOptions;
+    use MicrosoftAzure\Storage\Blob\Models\PublicAccessType;
+
     if(isset($_POST['submit'])){
         $result = "uea";
     }
