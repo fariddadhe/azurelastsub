@@ -1,5 +1,5 @@
     
-     <?php
+    <?php
 
     require_once 'vendor/autoload.php';
     require_once "./random_string.php";
@@ -9,34 +9,99 @@
     use MicrosoftAzure\Storage\Blob\Models\ListBlobsOptions;
     use MicrosoftAzure\Storage\Blob\Models\CreateContainerOptions;
     use MicrosoftAzure\Storage\Blob\Models\PublicAccessType;
-
-    function getData($oit){
-      
-
-        return "sdsdf";
-    }
-
-    if(isset($_POST['submit'])){
-        $result = getData("Bangke");
-    }
-
-        $connectionString = "DefaultEndpointsProtocol=https;AccountName=".getenv('azurewebblob').";AccountKey=".getenv('IRtUInLb2Cl8bYEp54JjFOsPTd9+eNdytEprSfLVTZWQKPp6i668ez1iU3h99iZRBjpqSsxwBi4dwHv7UvHLXg==');
+    function getData(){
+        $connectionString = "DefaultEndpointsProtocol=https;AccountName=".getenv('ACCOUNT_NAME').";AccountKey=".getenv('ACCOUNT_KEY');
 
         // Create blob client.
         $blobClient = BlobRestProxy::createBlobService($connectionString);
 
-        do{
+        // $fileToUpload = "kucing.jpg";
+        // $fileToUpload = $_POST['file'];
+
+        $url = "";
+
+        if (!isset($_GET["Cleanup"])) {
+            // Create container options object.
+            $createContainerOptions = new CreateContainerOptions();
+
+            $createContainerOptions->setPublicAccess(PublicAccessType::CONTAINER_AND_BLOBS);
+
+            // Set container metadata.
+            $createContainerOptions->addMetaData("key1", "value1");
+            $createContainerOptions->addMetaData("key2", "value2");
+
+            $containerName = "blockblobs".generateRandomString();
+
+            
+            try {
+                
+                // Create container.
+                $blobClient->createContainer($containerName, $createContainerOptions);
+
+                $myfile = fopen($_FILES["fileToUpload"]["tmp_name"], "r") or die("Unable to open file!");
+                fclose($myfile);
+
+                $fileToUpload = strtolower($_FILES["fileToUpload"]["name"]);
+                
+                // $content = fopen($_FILES["fileToUpload"]["name"], "r");
+
+                $check = fopen($_FILES["fileToUpload"]["tmp_name"], "r");
+                
+
+                //Upload blob
+                $blobClient->createBlockBlob($containerName, $fileToUpload, $check);
+
+                // List blobs.
+                $listBlobsOptions = new ListBlobsOptions();
+                $listBlobsOptions->setPrefix($fileToUpload);
+
+                // echo "These are the blobs present in the container: ";
+
+                do{
                     $result = $blobClient->listBlobs($containerName, $listBlobsOptions);
                     foreach ($result->getBlobs() as $blob)
                     {
-                        echo $blob->getName().": ".$blob->getUrl()."<br />";
-//                         $url = $blob->getUrl();
+                        // echo $blob->getName().": ".$blob->getUrl()."<br />";
+                        $url = $blob->getUrl();
                     }
                 
                     $listBlobsOptions->setContinuationToken($result->getContinuationToken());
-         } while($result->getContinuationToken());
-    ?>
+                } while($result->getContinuationToken());
+            }
+            catch(ServiceException $e){
+                $code = $e->getCode();
+                $error_message = $e->getMessage();
+                echo $code.": ".$error_message."<br />";
+            }
+            catch(InvalidArgumentTypeException $e){
+                $code = $e->getCode();
+                $error_message = $e->getMessage();
+                echo $code.": ".$error_message."<br />";
+            }
+        } 
+        else 
+        {
 
+            try{
+                // Delete container.
+                echo "Deleting Container".PHP_EOL;
+                echo $_GET["containerName"].PHP_EOL;
+                echo "<br />";
+                $blobClient->deleteContainer($_GET["containerName"]);
+            }
+            catch(ServiceException $e){
+                $code = $e->getCode();
+                $error_message = $e->getMessage();
+                echo $code.": ".$error_message."<br />";
+            }
+        }
+        return $url;
+    }
+
+    if(isset($_POST['submit'])){
+        $result = getData();
+    }
+    ?>
     <!DOCTYPE html>
     <html>
     <head>
