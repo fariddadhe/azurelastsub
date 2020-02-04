@@ -11,6 +11,8 @@
     use MicrosoftAzure\Storage\Blob\Models\PublicAccessType;
     function getData(){
         
+        $connectionString = "DefaultEndpointsProtocol=https;AccountName=azurewebblob;AccountKey=IRtUInLb2Cl8bYEp54JjFOsPTd9+eNdytEprSfLVTZWQKPp6i668ez1iU3h99iZRBjpqSsxwBi4dwHv7UvHLXg==";
+        
 
         // Create blob client.
         $blobClient = BlobRestProxy::createBlobService($connectionString);
